@@ -10,3 +10,9 @@
 
 'vite' 不是内部或外部命令，也不是可运行的程序
 或批处理文件。
+
+> order-management-frontend@1.0.0 dev
+> vite --host 127.0.0.1 --port 5173
+
+'vite' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。

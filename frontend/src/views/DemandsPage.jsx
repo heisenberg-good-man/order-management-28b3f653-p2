@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { store, PROFESSION_TYPES } from '../store/localStore.js'
+import { store, PROFESSION_TYPES, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { canPublishDemand, getPermissionDeniedMessage } from '../services/permissions.js'
 import { validateDemand } from '../services/validator.js'
 import EmptyState from '../components/EmptyState.jsx'
 import { useToast } from '../context/ToastContext.jsx'
@@ -10,6 +11,9 @@ export default function DemandsPage() {
   const toast = useToast()
   const [, force] = React.useReducer((x) => x + 1, 0)
   React.useEffect(() => store.subscribe(() => force()), [])
+  const state = store.getState()
+
+  const canPublish = canPublishDemand(state.currentRole)
 
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ profession_type: '', location: '', budget: '', expected_time: '', remark: '' })
@@ -27,6 +31,10 @@ export default function DemandsPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!canPublishDemand(state.currentRole)) {
+      toast.error(getPermissionDeniedMessage('publish_demand'))
+      return
+    }
     const errs = validateDemand(form)
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSubmitting(true)
@@ -43,12 +51,18 @@ export default function DemandsPage() {
       <div className="page-card" style={{ marginBottom: 16 }}>
         <div className="page-title">
           <span>📋 用工需求</span>
-          <button className="btn btn-primary" onClick={() => setShowForm(v => !v)}>
-            {showForm ? '收起发布表单' : '+ 发布新需求'}
-          </button>
+          {canPublish ? (
+            <button className="btn btn-primary" onClick={() => setShowForm(v => !v)}>
+              {showForm ? '收起发布表单' : '+ 发布新需求'}
+            </button>
+          ) : (
+            <div className="permission-denied" style={{ color: '#e74c3c', fontSize: 13, background: '#fef0f0', padding: '6px 14px', borderRadius: 6 }}>
+              💡 {getPermissionDeniedMessage('publish_demand')}，请切换到用户端
+            </div>
+          )}
         </div>
 
-        {showForm && (
+        {canPublish && showForm && (
           <div style={{ background: '#f9f9f9', padding: 16, borderRadius: 6, marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>发布新需求</div>
             <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>

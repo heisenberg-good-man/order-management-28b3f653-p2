@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS } from '../store/localStore.js'
+import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
 import { matchProviders } from '../services/matcher.js'
+import { canCreateOrder, getPermissionDeniedMessage } from '../services/permissions.js'
 import EmptyState from '../components/EmptyState.jsx'
 import { AuthStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'
@@ -21,6 +22,10 @@ export default function MatchesPage() {
   const matched = demand ? matchProviders(demand, store.listProviders()) : []
 
   const handleOrder = async (p) => {
+    if (!canCreateOrder(store.getState().currentRole)) {
+      toast.error(getPermissionDeniedMessage('create_order'))
+      return
+    }
     if (!demand) { toast.error('请先选择需求'); return }
     setOrderingId(p.id)
     const result = store.createOrder({
@@ -37,6 +42,8 @@ export default function MatchesPage() {
     toast.success('下单成功，等待服务商确认')
     navigate(`/orders/${result.id}`)
   }
+
+  const canOrder = canCreateOrder(store.getState().currentRole)
 
   return (
     <div>
@@ -108,13 +115,19 @@ export default function MatchesPage() {
                     </div>
                     {provider.intro && <div className="provider-intro">{provider.intro}</div>}
                     <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        disabled={orderingId === provider.id}
-                        onClick={() => handleOrder(provider)}
-                      >
-                        {orderingId === provider.id ? '下单中...' : '立即下单'}
-                      </button>
+                      {canOrder ? (
+                        <button
+                          className="btn btn-primary btn-sm"
+                          disabled={orderingId === provider.id}
+                          onClick={() => handleOrder(provider)}
+                        >
+                          {orderingId === provider.id ? '下单中...' : '立即下单'}
+                        </button>
+                      ) : (
+                        <div className="permission-denied" style={{ color: '#e67e22', fontSize: 13, padding: '4px 12px', background: '#fef9e7', borderRadius: 4, border: '1px solid #f9e79f' }}>
+                          💡 当前角色无法下单，请切换到用户端
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

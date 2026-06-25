@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS } from '../store/localStore.js'
+import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
 import { validateProvider } from '../services/validator.js'
+import { canRegisterProvider, getPermissionDeniedMessage } from '../services/permissions.js'
 import { AuthStatusTag } from '../components/StatusTags.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import { useToast } from '../context/ToastContext.jsx'
@@ -11,6 +12,7 @@ export default function ProviderList() {
   const toast = useToast()
   const [, force] = React.useReducer((x) => x + 1, 0)
   React.useEffect(() => store.subscribe(() => force()), [])
+  const state = store.getState()
 
   const [fProf, setFProf] = useState('')
   const [fAuth, setFAuth] = useState('')
@@ -23,6 +25,8 @@ export default function ProviderList() {
   })
   const [regErrors, setRegErrors] = useState({})
   const [regLoading, setRegLoading] = useState(false)
+
+  const canRegister = canRegisterProvider(state.currentRole)
 
   let list = store.listProviders({ profession_type: fProf || undefined, auth_status: fAuth || undefined })
   if (keyword.trim()) {
@@ -57,12 +61,16 @@ export default function ProviderList() {
       <div className="page-card" style={{ marginBottom: 16 }}>
         <div className="page-title">
           <span>👷 服务商列表（共 {list.length} 人）</span>
-          <button className="btn btn-primary" onClick={() => setShowReg(v => !v)}>
-            {showReg ? '收起表单' : '+ 申请入驻'}
-          </button>
+          {canRegister ? (
+            <button className="btn btn-primary" onClick={() => setShowReg(v => !v)}>
+              {showReg ? '收起表单' : '+ 申请入驻'}
+            </button>
+          ) : (
+            <div className="permission-denied">💡 {getPermissionDeniedMessage('register_provider')}</div>
+          )}
         </div>
 
-        {showReg && (
+        {canRegister && showReg && (
           <div style={{ background: '#f9f9f9', padding: 16, borderRadius: 6, marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>服务商入驻表单</div>
             <form onSubmit={handleRegister} style={{ maxWidth: 700 }}>
@@ -132,7 +140,7 @@ export default function ProviderList() {
         </div>
 
         {list.length === 0 ? (
-          <EmptyState text={keyword ? `没有找到与“${keyword}”匹配的服务商` : '暂无服务商，点击右上角「申请入驻」添加'} />
+          <EmptyState text={keyword ? `没有找到与"${keyword}"匹配的服务商` : '暂无服务商，点击右上角「申请入驻」添加'} />
         ) : (
           <div className="provider-list">
             {list.map(p => (

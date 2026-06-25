@@ -38,4 +38,10 @@ export function validateCancel(data) {
   return errors
 }
 
+export function validateExceptionRemark(data) {
+  const errors = {}
+  if (!data?.remark?.trim()) errors.remark = '请填写异常处理备注'
+  return errors
+}
+
 export { store, AUTH_STATUS, ORDER_STATUS }

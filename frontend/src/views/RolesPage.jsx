@@ -14,17 +14,20 @@ export default function RolesPage() {
     [ROLES.USER]: {
       icon: '👤',
       desc: '发布用工需求，查看推荐服务商，下单并跟踪订单进度',
-      features: ['发布用工需求', '查看撮合推荐', '发起下单', '跟踪订单状态', '取消订单']
+      features: ['发布用工需求', '查看撮合推荐', '发起下单', '跟踪订单状态', '取消订单'],
+      cannot: ['接单/开始/完成服务', '提交实名认证', '审核认证申请', '标记/处理异常']
     },
     [ROLES.PROVIDER]: {
       icon: '👷',
       desc: '入驻平台、完善资料、提交认证、接单并提供服务',
-      features: ['服务商入驻', '编辑个人资料', '提交实名认证', '查看/接单订单', '开始/完成服务']
+      features: ['服务商入驻', '编辑个人资料', '提交实名认证', '查看/接单订单', '开始/完成服务', '标记订单异常'],
+      cannot: ['发布需求/下单', '审核认证申请', '处理异常（恢复服务）']
     },
     [ROLES.ADMIN]: {
       icon: '🛠️',
-      desc: '平台运营管理：审核认证、监控订单、查看统计数据',
-      features: ['查看数据看板', '审核实名认证', '监控订单状态', '平台取消订单']
+      desc: '平台运营管理：审核认证、监控订单、处理异常状态',
+      features: ['查看数据看板', '审核实名认证', '监控全部订单', '处理异常恢复服务', '标记订单异常', '取消任意订单'],
+      cannot: ['发布需求/下单（用户操作）']
     }
   }
 
@@ -37,16 +40,16 @@ export default function RolesPage() {
     <div>
       <div className="page-card" style={{ marginBottom: 16 }}>
         <div className="page-title">
-          <span>🎭 角色切换</span>
+          <span>🎭 角色工作台</span>
           <span style={{ fontSize: 13, color: '#999', fontWeight: 'normal' }}>
             当前视角：<strong style={{ color: '#667eea' }}>{ROLE_LABELS[state.currentRole]}</strong>
           </span>
         </div>
         <p style={{ color: '#666', marginBottom: 16 }}>
-          本平台支持三个视角查看与操作，点击下方卡片切换角色后，顶部导航将展示对应模块。
+          不同角色拥有不同的操作权限，切换后页面按钮和可执行操作会相应变化。
         </p>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
         {Object.entries(roleDescs).map(([r, info]) => (
           <div
             key={r}
@@ -67,9 +70,15 @@ export default function RolesPage() {
             </div>
             <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>{info.desc}</div>
             <div style={{ fontSize: 13, color: '#333' }}>
-              <div style={{ fontWeight: 500, marginBottom: 6 }}>主要功能：</div>
+              <div style={{ fontWeight: 500, marginBottom: 6 }}>✅ 可执行操作：</div>
               <ul style={{ paddingLeft: 18, margin: 0 }}>
-                {info.features.map((f, i) => <li key={i} style={{ marginBottom: 2 }}>{f}</li>)}
+                {info.features.map((f, i) => <li key={i} style={{ marginBottom: 2, color: '#52c41a' }}>{f}</li>)}
+              </ul>
+            </div>
+            <div style={{ fontSize: 13, color: '#999', marginTop: 8 }}>
+              <div style={{ fontWeight: 500, marginBottom: 6 }}>🚫 无权限操作：</div>
+              <ul style={{ paddingLeft: 18, margin: 0 }}>
+                {info.cannot.map((f, i) => <li key={i} style={{ marginBottom: 2, color: '#ff4d4f' }}>{f}</li>)}
               </ul>
             </div>
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { store, AUTH_STATUS } from '../store/localStore.js'
+import { store, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
 import { validateAuth } from '../services/validator.js'
+import { canReviewAuth, canSubmitAuth, getPermissionDeniedMessage } from '../services/permissions.js'
 import { AuthStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
@@ -17,11 +18,14 @@ export default function AuthPage() {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
+  const [rejectError, setRejectError] = useState('')
   const [reviewProviderId, setReviewProviderId] = useState('')
 
   const provider = providerId ? store.getProvider(providerId) : null
   const auth = provider ? provider.auth : null
   const pendingList = store.listProviders({ auth_status: AUTH_STATUS.PENDING })
+
+  const canSubmit = canSubmitAuth(state.currentRole) || state.currentRole === ROLES.ADMIN
 
   React.useEffect(() => {
     if (auth) {
@@ -68,14 +72,19 @@ export default function AuthPage() {
   const handleOpenReject = (pid) => {
     setReviewProviderId(pid)
     setRejectReason('')
+    setRejectError('')
   }
 
   const handleConfirmReject = () => {
-    if (!rejectReason.trim()) { toast.error('请填写拒绝原因'); return }
+    if (!rejectReason.trim()) {
+      setRejectError('拒绝原因不能为空')
+      return
+    }
     store.rejectAuth(reviewProviderId, rejectReason.trim())
     toast.success('已驳回实名认证')
     setReviewProviderId('')
     setRejectReason('')
+    setRejectError('')
   }
 
   return (
@@ -146,12 +155,15 @@ export default function AuthPage() {
                   {errors.id_card_back && <div className="form-error">{errors.id_card_back}</div>}
                 </div>
               </div>
-              {canEdit && (
+              {canEdit && canSubmit && (
                 <div className="btn-group">
                   <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? '提交中...' : auth.status === AUTH_STATUS.REJECTED ? '重新提交认证' : '提交认证'}
                   </button>
                 </div>
+              )}
+              {canEdit && !canSubmit && (
+                <div className="permission-denied">💡 当前角色无法提交认证，请切换到服务商端</div>
               )}
               {!canEdit && (
                 <div style={{ color: '#999', fontSize: 13 }}>已通过认证的资料不可修改，如需变更请联系平台。</div>
@@ -161,32 +173,38 @@ export default function AuthPage() {
         )}
       </div>
 
-      <div className="page-card">
-        <div className="page-title"><span>🛠️ 管理员审核区（待审核 {pendingList.length} 人）</span></div>
-        {pendingList.length === 0 ? (
-          <div style={{ padding: 32, textAlign: 'center', color: '#999' }}>暂无待审核的认证申请</div>
-        ) : (
-          <div className="order-list">
-            {pendingList.map(p => (
-              <div key={p.id} className="order-card">
-                <div className="order-header">
-                  <div><strong>{p.name}</strong> · {p.profession_type} <span style={{ color: '#999', fontSize: 13, marginLeft: 12 }}>ID: {p.id}</span></div>
-                  <AuthStatusTag status={p.auth.status} />
+      {canReviewAuth(state.currentRole) ? (
+        <div className="page-card">
+          <div className="page-title"><span>🛠️ 管理员审核区（待审核 {pendingList.length} 人）</span></div>
+          {pendingList.length === 0 ? (
+            <div style={{ padding: 32, textAlign: 'center', color: '#999' }}>暂无待审核的认证申请</div>
+          ) : (
+            <div className="order-list">
+              {pendingList.map(p => (
+                <div key={p.id} className="order-card">
+                  <div className="order-header">
+                    <div><strong>{p.name}</strong> · {p.profession_type} <span style={{ color: '#999', fontSize: 13, marginLeft: 12 }}>ID: {p.id}</span></div>
+                    <AuthStatusTag status={p.auth.status} />
+                  </div>
+                  <div className="order-body">
+                    <div><span className="label">真实姓名：</span>{p.auth.real_name}</div>
+                    <div><span className="label">身份证号：</span>{p.auth.id_card_number}</div>
+                    <div><span className="label">提交时间：</span>{p.auth.submitted_at}</div>
+                  </div>
+                  <div className="order-footer">
+                    <button className="btn btn-success btn-sm" onClick={() => handleApprove(p.id)}>通过认证</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleOpenReject(p.id)}>拒绝认证</button>
+                  </div>
                 </div>
-                <div className="order-body">
-                  <div><span className="label">真实姓名：</span>{p.auth.real_name}</div>
-                  <div><span className="label">身份证号：</span>{p.auth.id_card_number}</div>
-                  <div><span className="label">提交时间：</span>{p.auth.submitted_at}</div>
-                </div>
-                <div className="order-footer">
-                  <button className="btn btn-success btn-sm" onClick={() => handleApprove(p.id)}>通过认证</button>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleOpenReject(p.id)}>拒绝认证</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="page-card">
+          <div style={{ padding: 32, textAlign: 'center', color: '#999' }}>审核功能仅限平台管理端，请切换角色后操作</div>
+        </div>
+      )}
 
       {reviewProviderId && (
         <div className="modal-overlay" onClick={() => setReviewProviderId('')}>
@@ -195,7 +213,8 @@ export default function AuthPage() {
             <div className="modal-body">
               <div className="form-group">
                 <label className="form-label"><span className="required">*</span>拒绝原因</label>
-                <textarea className="form-textarea" rows={4} placeholder="请填写具体的拒绝原因，方便服务商修改后重新提交" value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
+                <textarea className={`form-textarea ${rejectError ? 'error' : ''}`} rows={4} placeholder="请填写具体的拒绝原因，方便服务商修改后重新提交" value={rejectReason} onChange={e => { setRejectReason(e.target.value); if (rejectError) setRejectError('') }} />
+                {rejectError && <div className="form-error">{rejectError}</div>}
               </div>
             </div>
             <div className="modal-footer">

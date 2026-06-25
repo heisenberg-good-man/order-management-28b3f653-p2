@@ -9,6 +9,7 @@ export const ORDER_STATUS = {
   PENDING_CONFIRM: '待确认',
   ACCEPTED: '已接单',
   IN_SERVICE: '服务中',
+  EXCEPTION: '异常待处理',
   COMPLETED: '已完成',
   CANCELLED: '已取消',
 }
@@ -24,6 +25,7 @@ export const ORDER_STATUS_COLOR = {
   待确认: '#faad14',
   已接单: '#1890ff',
   服务中: '#13c2c2',
+  异常待处理: '#ff4d4f',
   已完成: '#52c41a',
   已取消: '#999',
 }

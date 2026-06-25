@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS } from '../store/localStore.js'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
 import { validateProvider } from '../services/validator.js'
+import { canEditProvider, getPermissionDeniedMessage } from '../services/permissions.js'
 import { AuthStatusTag, OrderStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
@@ -11,12 +12,15 @@ export default function ProviderDetail() {
   const toast = useToast()
   const [, force] = React.useReducer((x) => x + 1, 0)
   React.useEffect(() => store.subscribe(() => force()), [])
+  const state = store.getState()
 
   const provider = store.getProvider(id)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({})
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  const canEdit = canEditProvider(state.currentRole)
 
   React.useEffect(() => {
     if (provider) {
@@ -78,9 +82,11 @@ export default function ProviderDetail() {
             <button className="btn btn-default" onClick={() => { store.setCurrentProviderId(provider.id); navigate('/auth') }}>
               查看实名认证
             </button>
-            <button className="btn btn-primary" onClick={() => setEditing(v => !v)} disabled={loading}>
-              {editing ? '取消编辑' : '编辑资料'}
-            </button>
+            {canEdit && (
+              <button className="btn btn-primary" onClick={() => setEditing(v => !v)} disabled={loading}>
+                {editing ? '取消编辑' : '编辑资料'}
+              </button>
+            )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-const now = () => new Date().toISOString()
+const now = () => new Date().toLocaleString('zh-CN', { hour12: false })
 const uid = (pfx) => `${pfx}_${Date.now()}_${Math.floor(Math.random() * 1000)}`
 
 export const PROFESSION_TYPES = [
@@ -15,13 +15,15 @@ export const ORDER_STATUS = {
   PENDING_CONFIRM: '待确认',
   ACCEPTED: '已接单',
   IN_SERVICE: '服务中',
+  EXCEPTION: '异常待处理',
   COMPLETED: '已完成',
   CANCELLED: '已取消'
 }
 export const ORDER_TRANSITIONS = {
   [ORDER_STATUS.PENDING_CONFIRM]: [ORDER_STATUS.ACCEPTED, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.ACCEPTED]: [ORDER_STATUS.IN_SERVICE, ORDER_STATUS.CANCELLED],
-  [ORDER_STATUS.IN_SERVICE]: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.IN_SERVICE]: [ORDER_STATUS.COMPLETED, ORDER_STATUS.EXCEPTION, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.EXCEPTION]: [ORDER_STATUS.IN_SERVICE, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.COMPLETED]: [],
   [ORDER_STATUS.CANCELLED]: []
 }
@@ -34,6 +36,19 @@ export const ROLE_LABELS = {
   [ROLES.USER]: '用户端',
   [ROLES.PROVIDER]: '服务商端',
   [ROLES.ADMIN]: '平台管理端'
+}
+
+function addRecord(orderId, role, action, detail, result) {
+  state.operation_records.push({
+    id: uid('rec'),
+    order_id: orderId,
+    role,
+    role_label: ROLE_LABELS[role] || role,
+    action,
+    detail,
+    result,
+    created_at: now()
+  })
 }
 
 function buildInitial() {
@@ -116,8 +131,9 @@ function buildInitial() {
     status: 'OPEN'
   }
 
+  const orderId = uid('order')
   const o1 = {
-    id: uid('order'),
+    id: orderId,
     demand_id: demandId,
     provider_id: p1.id,
     provider_name: p1.name,
@@ -130,17 +146,26 @@ function buildInitial() {
     remark: '需要有金牌月嫂证书，会做月子餐',
     status: ORDER_STATUS.PENDING_CONFIRM,
     cancel_reason: '',
+    exception_remark: '',
     created_at: now(),
     accepted_at: null,
     started_at: null,
     completed_at: null,
-    cancelled_at: null
+    cancelled_at: null,
+    exception_at: null,
+    resolved_at: null
   }
+
+  const initRecords = [
+    { id: uid('rec'), order_id: orderId, role: ROLES.USER, role_label: '用户端', action: '发起下单', detail: '用户小明对服务商张阿姨发起下单', result: '订单创建成功，状态：待确认', created_at: o1.created_at },
+    { id: uid('rec'), order_id: orderId, role: ROLES.ADMIN, role_label: '平台管理端', action: '审核实名认证', detail: '审核服务商张桂芳的实名认证', result: '审核通过', created_at: p1.auth.reviewed_at },
+  ]
 
   return {
     providers: [p1, p2, p3, p4, p5],
     demands: [d1],
     orders: [o1],
+    operation_records: initRecords,
     currentRole: ROLES.USER,
     currentProviderId: p1.id,
     currentUserId: 'user_001',
@@ -148,12 +173,15 @@ function buildInitial() {
   }
 }
 
-const STORAGE_KEY = 'intermediary_platform_state_v1'
+const STORAGE_KEY = 'intermediary_platform_state_v2'
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed.operation_records) return parsed
+    }
   } catch (e) {}
   const init = buildInitial()
   save(init)
@@ -302,11 +330,13 @@ export const store = {
     return list
   },
   getOrder: (id) => state.orders.find(o => o.id === id),
+  getOrderRecords: (orderId) => state.operation_records.filter(r => r.order_id === orderId),
+  getAllRecords: () => state.operation_records.slice(),
   createOrder: (data) => {
     const exists = state.orders.find(o =>
       o.provider_id === data.provider_id &&
       o.user_id === (data.user_id || state.currentUserId) &&
-      [ORDER_STATUS.PENDING_CONFIRM, ORDER_STATUS.ACCEPTED, ORDER_STATUS.IN_SERVICE].includes(o.status)
+      [ORDER_STATUS.PENDING_CONFIRM, ORDER_STATUS.ACCEPTED, ORDER_STATUS.IN_SERVICE, ORDER_STATUS.EXCEPTION].includes(o.status)
     )
     if (exists) return { error: '该服务商已有进行中的订单，请勿重复提交' }
 
@@ -327,13 +357,17 @@ export const store = {
       remark: data.remark || (demand ? demand.remark : ''),
       status: ORDER_STATUS.PENDING_CONFIRM,
       cancel_reason: '',
+      exception_remark: '',
       created_at: now(),
       accepted_at: null,
       started_at: null,
       completed_at: null,
-      cancelled_at: null
+      cancelled_at: null,
+      exception_at: null,
+      resolved_at: null
     }
     state.orders.push(order)
+    addRecord(order.id, ROLES.USER, '发起下单', `用户${order.user_name}对服务商${order.provider_name}发起下单`, '订单创建成功，状态：待确认')
     emit()
     return order
   },
@@ -341,8 +375,11 @@ export const store = {
     const o = state.orders.find(o => o.id === id)
     if (!o) return { error: '订单不存在' }
     if (!ORDER_TRANSITIONS[o.status].includes(ORDER_STATUS.ACCEPTED)) return { error: '当前状态无法接单' }
+    const p = state.providers.find(p => p.id === o.provider_id)
+    if (p && p.auth.status !== AUTH_STATUS.APPROVED) return { error: '未通过实名认证的服务商不能接单，请先完成认证' }
     o.status = ORDER_STATUS.ACCEPTED
     o.accepted_at = now()
+    addRecord(id, ROLES.PROVIDER, '接单', `服务商${o.provider_name}确认接单`, '订单状态变更为：已接单')
     emit()
     return o
   },
@@ -352,6 +389,7 @@ export const store = {
     if (!ORDER_TRANSITIONS[o.status].includes(ORDER_STATUS.IN_SERVICE)) return { error: '当前状态无法开始服务' }
     o.status = ORDER_STATUS.IN_SERVICE
     o.started_at = now()
+    addRecord(id, ROLES.PROVIDER, '开始服务', `服务商${o.provider_name}开始提供服务`, '订单状态变更为：服务中')
     emit()
     return o
   },
@@ -361,6 +399,7 @@ export const store = {
     if (!ORDER_TRANSITIONS[o.status].includes(ORDER_STATUS.COMPLETED)) return { error: '当前状态无法完成' }
     o.status = ORDER_STATUS.COMPLETED
     o.completed_at = now()
+    addRecord(id, ROLES.PROVIDER, '完成服务', `服务商${o.provider_name}完成本次服务`, '订单状态变更为：已完成')
     emit()
     return o
   },
@@ -368,9 +407,35 @@ export const store = {
     const o = state.orders.find(o => o.id === id)
     if (!o) return { error: '订单不存在' }
     if (!ORDER_TRANSITIONS[o.status].includes(ORDER_STATUS.CANCELLED)) return { error: '当前状态无法取消' }
+    if (!reason || !reason.trim()) return { error: '取消原因不能为空' }
     o.status = ORDER_STATUS.CANCELLED
-    o.cancel_reason = reason
+    o.cancel_reason = reason.trim()
     o.cancelled_at = now()
+    const role = state.currentRole
+    addRecord(id, role, '取消订单', `${ROLE_LABELS[role]}取消订单，原因：${reason.trim()}`, '订单状态变更为：已取消')
+    emit()
+    return o
+  },
+  escalateOrder: (id, remark) => {
+    const o = state.orders.find(o => o.id === id)
+    if (!o) return { error: '订单不存在' }
+    if (o.status !== ORDER_STATUS.IN_SERVICE) return { error: '仅服务中的订单可标记异常' }
+    if (!remark || !remark.trim()) return { error: '异常处理备注不能为空' }
+    o.status = ORDER_STATUS.EXCEPTION
+    o.exception_remark = remark.trim()
+    o.exception_at = now()
+    addRecord(id, state.currentRole, '标记异常', `${ROLE_LABELS[state.currentRole]}标记订单异常，备注：${remark.trim()}`, '订单状态变更为：异常待处理')
+    emit()
+    return o
+  },
+  resolveOrder: (id, remark) => {
+    const o = state.orders.find(o => o.id === id)
+    if (!o) return { error: '订单不存在' }
+    if (o.status !== ORDER_STATUS.EXCEPTION) return { error: '仅异常待处理的订单可恢复服务' }
+    if (!remark || !remark.trim()) return { error: '异常处理备注不能为空' }
+    o.status = ORDER_STATUS.IN_SERVICE
+    o.resolved_at = now()
+    addRecord(id, ROLES.ADMIN, '恢复服务', `平台管理端处理异常并恢复服务，备注：${remark.trim()}`, '订单状态变更为：服务中')
     emit()
     return o
   },
@@ -382,7 +447,7 @@ export const store = {
     providers.forEach(p => { authStats[p.auth.status] = (authStats[p.auth.status] || 0) + 1 })
     const orderStats = Object.values(ORDER_STATUS).reduce((acc, s) => { acc[s] = 0; return acc }, {})
     orders.forEach(o => { orderStats[o.status] = (orderStats[o.status] || 0) + 1 })
-    return { total_providers: providers.length, total_orders: orders.length, authStats, orderStats }
+    return { total_providers: providers.length, total_orders: orders.length, total_records: state.operation_records.length, authStats, orderStats }
   },
 
   reset: () => { state = buildInitial(); emit() }
