@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { demandApi, providerApi } from '../../api'
-import { useToast } from '../../context/ToastContext'
+import { demandApi, providerApi } from '../../api/index.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function UserPublishDemand() {
   const navigate = useNavigate()

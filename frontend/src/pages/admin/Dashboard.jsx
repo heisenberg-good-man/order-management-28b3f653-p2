@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { adminApi } from '../../api'
-import { useToast } from '../../context/ToastContext'
+import { adminApi } from '../../api/index.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()

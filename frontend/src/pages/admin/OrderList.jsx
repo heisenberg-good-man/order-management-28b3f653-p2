@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { adminApi, orderApi } from '../../api'
-import EmptyState from '../../components/EmptyState'
-import { OrderStatusTag } from '../../components/StatusTags'
-import CancelOrderModal from '../../components/CancelOrderModal'
-import { ORDER_STATUS } from '../../utils/constants'
-import { useToast } from '../../context/ToastContext'
+import { adminApi, orderApi } from '../../api/index.js'
+import EmptyState from '../../components/EmptyState.jsx'
+import { OrderStatusTag } from '../../components/StatusTags.jsx'
+import CancelOrderModal from '../../components/CancelOrderModal.jsx'
+import { ORDER_STATUS } from '../../utils/constants.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function AdminOrderList() {
   const toast = useToast()

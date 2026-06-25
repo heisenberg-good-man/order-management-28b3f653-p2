@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { orderApi } from '../../api'
-import { OrderStatusTag } from '../../components/StatusTags'
-import CancelOrderModal from '../../components/CancelOrderModal'
-import OrderTimeline from '../../components/OrderTimeline'
-import { ORDER_STATUS } from '../../utils/constants'
-import { useToast } from '../../context/ToastContext'
+import { orderApi } from '../../api/index.js'
+import { OrderStatusTag } from '../../components/StatusTags.jsx'
+import CancelOrderModal from '../../components/CancelOrderModal.jsx'
+import OrderTimeline from '../../components/OrderTimeline.jsx'
+import { ORDER_STATUS } from '../../utils/constants.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function UserOrderDetail() {
   const { id } = useParams()

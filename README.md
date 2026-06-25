@@ -87,7 +87,11 @@ order-management-28b3f653-p2/
 | 🔧 样式 | [frontend/src/styles/global.css](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/frontend/src/styles/global.css) | 新增 `.timeline-item.exception`、`.record-*`、`.permission-denied` 样式 |
 | 🔧 状态常量 | [frontend/src/utils/constants.js](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/frontend/src/utils/constants.js) | 新增 `EXCEPTION: '异常待处理'` 及红色映射 |
 | 🔧 全部 views | `Home/RolesPage/ProviderList/ProviderDetail/AuthPage/DemandsPage/MatchesPage/OrdersPage/OrderDetail` | 所有按钮级权限接入 `permissions.js`；无权限时显示 `permission-denied` 提示；订单页/详情页新增异常标记/处理弹窗；订单详情渲染操作记录 |
-| 🧹 全部 import | 全量 20+ 文件 | 所有 import 路径补 `.js` / `.jsx` 后缀；清理 11 个文件的未使用 import（ORDER_STATUS/ROLES/ROLE_LABELS/getPermissionDeniedMessage/React 等） |
+| 🧹 全部 import | 全量 34+ 文件 | 所有 import 路径补 `.js` / `.jsx` 后缀（含 `pages/` 历史目录 14 个文件 64 处）；清理 12 个文件的未使用 import |
+| 🔧 后端常量 | [backend/models/constants.py](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/backend/models/constants.py) | 新增 `EXCEPTION` 状态枚举和 `ORDER_TRANSITIONS` 状态流转表 |
+| 🔧 后端模型 | [backend/models/order.py](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/backend/models/order.py) | 新增 `exception_remark`、`exception_at`、`resolved_at` 字段；新增 `escalate()`、`resolve()` 方法；对齐前端状态机 |
+| 🔧 后端接口 | [backend/api/order_routes.py](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/backend/api/order_routes.py) | 新增 `/api/orders/:id/escalate` 和 `/api/orders/:id/resolve` 接口；防重复下单校验补上 EXCEPTION 状态 |
+| 🔧 后端校验 | [backend/services/validation_service.py](file:///d:/code-space/coding-soler/order-management-28b3f653-p2/backend/services/validation_service.py) | 新增 `validate_exception_remark()` 校验函数 |
 
 ---
 

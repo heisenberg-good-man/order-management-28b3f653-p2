@@ -29,11 +29,14 @@ class Order:
         self.remark = remark
         self.status = ORDER_STATUS["PENDING_CONFIRM"]
         self.cancel_reason = ""
+        self.exception_remark = ""
         self.created_at = datetime.now().isoformat()
         self.accepted_at = None
         self.started_at = None
         self.completed_at = None
         self.cancelled_at = None
+        self.exception_at = None
+        self.resolved_at = None
 
     def to_dict(self):
         return {
@@ -50,18 +53,22 @@ class Order:
             "remark": self.remark,
             "status": self.status,
             "cancel_reason": self.cancel_reason,
+            "exception_remark": self.exception_remark,
             "created_at": self.created_at,
             "accepted_at": self.accepted_at,
             "started_at": self.started_at,
             "completed_at": self.completed_at,
             "cancelled_at": self.cancelled_at,
+            "exception_at": self.exception_at,
+            "resolved_at": self.resolved_at,
         }
 
     def can_transition(self, new_status):
         valid_transitions = {
             ORDER_STATUS["PENDING_CONFIRM"]: [ORDER_STATUS["ACCEPTED"], ORDER_STATUS["CANCELLED"]],
             ORDER_STATUS["ACCEPTED"]: [ORDER_STATUS["IN_SERVICE"], ORDER_STATUS["CANCELLED"]],
-            ORDER_STATUS["IN_SERVICE"]: [ORDER_STATUS["COMPLETED"], ORDER_STATUS["CANCELLED"]],
+            ORDER_STATUS["IN_SERVICE"]: [ORDER_STATUS["COMPLETED"], ORDER_STATUS["EXCEPTION"], ORDER_STATUS["CANCELLED"]],
+            ORDER_STATUS["EXCEPTION"]: [ORDER_STATUS["IN_SERVICE"], ORDER_STATUS["CANCELLED"]],
             ORDER_STATUS["COMPLETED"]: [],
             ORDER_STATUS["CANCELLED"]: [],
         }
@@ -93,5 +100,22 @@ class Order:
             self.status = ORDER_STATUS["CANCELLED"]
             self.cancel_reason = reason
             self.cancelled_at = datetime.now().isoformat()
+            return True
+        return False
+
+    def escalate(self, remark):
+        if self.can_transition(ORDER_STATUS["EXCEPTION"]):
+            self.status = ORDER_STATUS["EXCEPTION"]
+            self.exception_remark = remark
+            self.exception_at = datetime.now().isoformat()
+            return True
+        return False
+
+    def resolve(self, remark):
+        if self.can_transition(ORDER_STATUS["IN_SERVICE"]):
+            self.status = ORDER_STATUS["IN_SERVICE"]
+            self.resolved_at = datetime.now().isoformat()
+            if remark:
+                self.exception_remark = remark
             return True
         return False

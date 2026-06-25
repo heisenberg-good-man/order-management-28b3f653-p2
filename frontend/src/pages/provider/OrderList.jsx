@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { orderApi } from '../../api'
-import EmptyState from '../../components/EmptyState'
-import { OrderStatusTag } from '../../components/StatusTags'
-import CancelOrderModal from '../../components/CancelOrderModal'
-import { ORDER_STATUS } from '../../utils/constants'
-import { useToast } from '../../context/ToastContext'
+import { orderApi } from '../../api/index.js'
+import EmptyState from '../../components/EmptyState.jsx'
+import { OrderStatusTag } from '../../components/StatusTags.jsx'
+import CancelOrderModal from '../../components/CancelOrderModal.jsx'
+import { ORDER_STATUS } from '../../utils/constants.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function ProviderOrderList() {
   const navigate = useNavigate()

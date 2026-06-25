@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { providerApi } from '../../api'
-import { useToast } from '../../context/ToastContext'
-import { AuthStatusTag } from '../../components/StatusTags'
+import { providerApi } from '../../api/index.js'
+import { useToast } from '../../context/ToastContext.jsx'
+import { AuthStatusTag } from '../../components/StatusTags.jsx'
 
 export default function ProviderProfile() {
   const navigate = useNavigate()

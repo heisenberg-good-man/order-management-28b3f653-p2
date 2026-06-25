@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { providerApi } from '../../api'
-import { useToast } from '../../context/ToastContext'
+import { providerApi } from '../../api/index.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function ProviderRegister() {
   const navigate = useNavigate()

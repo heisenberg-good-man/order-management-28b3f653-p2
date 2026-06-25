@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi, providerApi } from '../../api'
-import { AuthStatusTag } from '../../components/StatusTags'
-import { AUTH_STATUS } from '../../utils/constants'
-import { useToast } from '../../context/ToastContext'
+import { authApi, providerApi } from '../../api/index.js'
+import { AuthStatusTag } from '../../components/StatusTags.jsx'
+import { AUTH_STATUS } from '../../utils/constants.js'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function ProviderAuth() {
   const navigate = useNavigate()

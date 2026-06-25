@@ -82,3 +82,10 @@ def validate_order_cancel(data):
     if not data.get("cancel_reason") or not data["cancel_reason"].strip():
         errors["cancel_reason"] = "请填写取消原因"
     return errors
+
+
+def validate_exception_remark(data):
+    errors = {}
+    if not data.get("remark") or not data["remark"].strip():
+        errors["remark"] = "请填写异常处理备注"
+    return errors

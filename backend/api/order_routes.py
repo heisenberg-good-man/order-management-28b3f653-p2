@@ -61,7 +61,7 @@ def create_order():
         o for o in db.orders.values()
         if o.provider_id == provider_id
         and o.user_id == data.get("user_id", "user_001")
-        and o.status in [ORDER_STATUS["PENDING_CONFIRM"], ORDER_STATUS["ACCEPTED"], ORDER_STATUS["IN_SERVICE"]]
+        and o.status in [ORDER_STATUS["PENDING_CONFIRM"], ORDER_STATUS["ACCEPTED"], ORDER_STATUS["IN_SERVICE"], ORDER_STATUS["EXCEPTION"]]
     ]
     if existing:
         return jsonify({"code": 409, "data": None, "message": "该服务商已有进行中的订单，请勿重复提交"}), 409
@@ -130,3 +130,37 @@ def cancel_order(order_id):
     if order.cancel(data["cancel_reason"].strip()):
         return jsonify({"code": 0, "data": order.to_dict(), "message": "订单已取消"})
     return jsonify({"code": 400, "data": order.to_dict(), "message": "当前订单状态无法取消"}), 400
+
+
+@order_bp.route("/<order_id>/escalate", methods=["POST"])
+def escalate_order(order_id):
+    db = get_db()
+    order = db.orders.get(order_id)
+    if not order:
+        return jsonify({"code": 404, "data": None, "message": "订单不存在"}), 404
+
+    data = request.get_json() or {}
+    remark = (data.get("remark") or "").strip()
+    if not remark:
+        return jsonify({"code": 400, "data": None, "message": "异常处理备注不能为空"}), 400
+
+    if order.escalate(remark):
+        return jsonify({"code": 0, "data": order.to_dict(), "message": "已标记为异常待处理"})
+    return jsonify({"code": 400, "data": order.to_dict(), "message": "当前订单状态无法标记异常"}), 400
+
+
+@order_bp.route("/<order_id>/resolve", methods=["POST"])
+def resolve_order(order_id):
+    db = get_db()
+    order = db.orders.get(order_id)
+    if not order:
+        return jsonify({"code": 404, "data": None, "message": "订单不存在"}), 404
+
+    data = request.get_json() or {}
+    remark = (data.get("remark") or "").strip()
+    if not remark:
+        return jsonify({"code": 400, "data": None, "message": "异常处理备注不能为空"}), 400
+
+    if order.resolve(remark):
+        return jsonify({"code": 0, "data": order.to_dict(), "message": "异常已处理，订单恢复服务中"})
+    return jsonify({"code": 400, "data": order.to_dict(), "message": "当前订单状态无法恢复服务"}), 400

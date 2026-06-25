@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { demandApi } from '../../api'
-import EmptyState from '../../components/EmptyState'
-import { AuthStatusTag } from '../../components/StatusTags'
-import { useToast } from '../../context/ToastContext'
+import { demandApi } from '../../api/index.js'
+import EmptyState from '../../components/EmptyState.jsx'
+import { AuthStatusTag } from '../../components/StatusTags.jsx'
+import { useToast } from '../../context/ToastContext.jsx'
 
 export default function UserDemandList() {
   const [demands, setDemands] = useState([])
