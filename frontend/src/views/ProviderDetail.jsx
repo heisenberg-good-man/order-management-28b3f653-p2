@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { store, PROFESSION_TYPES, AUTH_STATUS } from '../store/localStore.js'
 import { validateProvider } from '../services/validator.js'
-import { canEditProvider, getPermissionDeniedMessage } from '../services/permissions.js'
+import { canEditProvider } from '../services/permissions.js'
 import { AuthStatusTag, OrderStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 

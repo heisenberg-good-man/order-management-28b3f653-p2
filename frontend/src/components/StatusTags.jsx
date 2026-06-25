@@ -1,5 +1,5 @@
 import React from 'react'
-import { AUTH_STATUS_COLOR, ORDER_STATUS_COLOR } from '../utils/constants'
+import { AUTH_STATUS_COLOR, ORDER_STATUS_COLOR } from '../utils/constants.js'
 
 export function AuthStatusTag({ status }) {
   const color = AUTH_STATUS_COLOR[status] || '#999'

@@ -1,5 +1,4 @@
-import { store } from '../store/localStore'
-import { AUTH_STATUS, ORDER_STATUS } from '../store/localStore'
+import { store, AUTH_STATUS, ORDER_STATUS } from '../store/localStore.js'
 
 export function validateProvider(data) {
   const errors = {}

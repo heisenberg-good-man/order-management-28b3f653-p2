@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { store } from '../store/localStore.js'
 import { matchProviders } from '../services/matcher.js'
 import { canCreateOrder, getPermissionDeniedMessage } from '../services/permissions.js'
 import EmptyState from '../components/EmptyState.jsx'

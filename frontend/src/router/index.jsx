@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Home from '../views/Home.jsx'
 import ProviderList from '../views/ProviderList.jsx'
 import ProviderDetail from '../views/ProviderDetail.jsx'

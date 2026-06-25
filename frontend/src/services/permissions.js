@@ -1,4 +1,4 @@
-import { ROLES, AUTH_STATUS, ORDER_STATUS } from '../store/localStore'
+import { ROLES, AUTH_STATUS, ORDER_STATUS } from '../store/localStore.js'
 
 export function canPublishDemand(role) {
   return role === ROLES.USER || role === ROLES.ADMIN

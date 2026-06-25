@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useToast } from '../context/ToastContext'
+import { useState } from 'react'
+import { useToast } from '../context/ToastContext.jsx'
 
 export default function CancelOrderModal({ visible, onClose, onConfirm }) {
   const [reason, setReason] = useState('')

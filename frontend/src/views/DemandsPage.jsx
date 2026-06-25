@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { store, PROFESSION_TYPES, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { store, PROFESSION_TYPES } from '../store/localStore.js'
 import { canPublishDemand, getPermissionDeniedMessage } from '../services/permissions.js'
 import { validateDemand } from '../services/validator.js'
 import EmptyState from '../components/EmptyState.jsx'

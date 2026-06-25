@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { store, ROLE_LABELS, ROLES, ORDER_STATUS } from '../store/localStore.js'
+import { store, ROLE_LABELS, ROLES } from '../store/localStore.js'
 import { AuthStatusTag, OrderStatusTag } from '../components/StatusTags.jsx'
 
 export default function Home() {

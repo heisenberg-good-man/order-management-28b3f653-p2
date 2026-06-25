@@ -1,4 +1,4 @@
-import { AUTH_STATUS } from '../store/localStore'
+import { AUTH_STATUS } from '../store/localStore.js'
 
 export function matchProviders(demand, providers) {
   if (!demand || !providers) return []

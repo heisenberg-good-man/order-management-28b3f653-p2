@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { store, PROFESSION_TYPES, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { store, PROFESSION_TYPES, AUTH_STATUS } from '../store/localStore.js'
 import { validateProvider } from '../services/validator.js'
 import { canRegisterProvider, getPermissionDeniedMessage } from '../services/permissions.js'
 import { AuthStatusTag } from '../components/StatusTags.jsx'

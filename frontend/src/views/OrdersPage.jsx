@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { store, ORDER_STATUS, ROLES, ROLE_LABELS, AUTH_STATUS } from '../store/localStore.js'
+import { store, ORDER_STATUS, ROLES, AUTH_STATUS } from '../store/localStore.js'
 import EmptyState from '../components/EmptyState.jsx'
 import { OrderStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'

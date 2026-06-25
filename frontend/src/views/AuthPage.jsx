@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { store, AUTH_STATUS, ROLES, ROLE_LABELS } from '../store/localStore.js'
+import { store, AUTH_STATUS, ROLES } from '../store/localStore.js'
 import { validateAuth } from '../services/validator.js'
-import { canReviewAuth, canSubmitAuth, getPermissionDeniedMessage } from '../services/permissions.js'
+import { canReviewAuth, canSubmitAuth } from '../services/permissions.js'
 import { AuthStatusTag } from '../components/StatusTags.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 

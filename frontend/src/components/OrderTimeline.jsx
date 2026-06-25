@@ -1,5 +1,5 @@
 import React from 'react'
-import { ORDER_STATUS } from '../utils/constants'
+import { ORDER_STATUS } from '../utils/constants.js'
 
 export default function OrderTimeline({ order, records }) {
   const items = []
