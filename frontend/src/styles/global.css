@@ -696,3 +696,152 @@ body {
   font-size: 13px;
   margin-bottom: 16px;
 }
+
+.detail-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 24px;
+}
+
+.detail-tabs .detail-tab {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  outline: none;
+}
+
+.detail-tabs .detail-tab:hover {
+  color: #667eea;
+}
+
+.detail-tabs .detail-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  font-weight: 600;
+}
+
+.payment-steps {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  gap: 0;
+}
+
+.payment-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  text-align: center;
+}
+
+.payment-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 2px;
+  background: #e8e8e8;
+}
+
+.payment-step.done:not(:last-child)::after {
+  background: #52c41a;
+}
+
+.payment-step.current:not(:last-child)::after {
+  background: linear-gradient(to right, #667eea, #e8e8e8);
+}
+
+.payment-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  z-index: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #e8e8e8;
+}
+
+.payment-step.done .payment-step-dot {
+  background: #52c41a;
+  color: #fff;
+  box-shadow: 0 0 0 1px #52c41a;
+}
+
+.payment-step.current .payment-step-dot {
+  background: #667eea;
+  color: #fff;
+  box-shadow: 0 0 0 1px #667eea, 0 0 0 4px rgba(102, 126, 234, 0.15);
+}
+
+.payment-step-label {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+}
+
+.payment-step.done .payment-step-label {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.payment-step.current .payment-step-label {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.btn-warning {
+  background: #fa8c16;
+  color: #fff;
+}
+
+.btn-warning:hover {
+  background: #d46b08;
+  color: #fff;
+}
+
+.btn-warning:disabled {
+  background: #ffd591;
+  cursor: not-allowed;
+}
+
+.search-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: #999;
+  font-size: 14px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px dashed #d9d9d9;
+}
+
+.search-empty .empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+

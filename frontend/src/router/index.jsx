@@ -8,6 +8,9 @@ import DemandsPage from '../views/DemandsPage.jsx'
 import MatchesPage from '../views/MatchesPage.jsx'
 import OrdersPage from '../views/OrdersPage.jsx'
 import OrderDetail from '../views/OrderDetail.jsx'
+import ContractsPage from '../views/ContractsPage.jsx'
+import PaymentsPage from '../views/PaymentsPage.jsx'
+import InterventionsPage from '../views/InterventionsPage.jsx'
 import RolesPage from '../views/RolesPage.jsx'
 import NotFound from '../views/NotFound.jsx'
 
@@ -23,6 +26,9 @@ export default function AppRouter() {
       <Route path="/matches/:demandId" element={<MatchesPage />} />
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/orders/:id" element={<OrderDetail />} />
+      <Route path="/contracts" element={<ContractsPage />} />
+      <Route path="/payments" element={<PaymentsPage />} />
+      <Route path="/interventions" element={<InterventionsPage />} />
       <Route path="/roles" element={<RolesPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

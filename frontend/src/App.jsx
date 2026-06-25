@@ -11,6 +11,9 @@ const NAVS = [
   { path: '/demands', label: '用工需求', icon: '📋' },
   { path: '/matches', label: '撮合推荐', icon: '🤝' },
   { path: '/orders', label: '订单管理', icon: '📦' },
+  { path: '/contracts', label: '合同协议', icon: '📝' },
+  { path: '/payments', label: '担保付款', icon: '💰' },
+  { path: '/interventions', label: '平台介入', icon: '⚖️' },
   { path: '/roles', label: '角色切换', icon: '🎭' },
 ]
 

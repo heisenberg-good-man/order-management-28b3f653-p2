@@ -58,6 +58,43 @@ export const orderApi = {
   cancel: (id, cancelReason) => request(`/orders/${id}/cancel`, { method: 'POST', body: { cancel_reason: cancelReason } }),
 }
 
+export const contractApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return request(`/contracts${qs ? '?' + qs : ''}`)
+  },
+  get: (id) => request(`/contracts/${id}`),
+  getByOrder: (orderId) => request(`/contracts/by-order/${orderId}`),
+  update: (id, data) => request(`/contracts/${id}`, { method: 'PUT', body: data }),
+  sign: (id) => request(`/contracts/${id}/sign`, { method: 'POST' }),
+  reject: (id, reason) => request(`/contracts/${id}/reject`, { method: 'POST', body: { reason } }),
+  void: (id, reason) => request(`/contracts/${id}/void`, { method: 'POST', body: { reason } }),
+}
+
+export const paymentApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return request(`/payments${qs ? '?' + qs : ''}`)
+  },
+  get: (id) => request(`/payments/${id}`),
+  getByOrder: (orderId) => request(`/payments/by-order/${orderId}`),
+  escrow: (orderId, amount) => request(`/payments/${orderId}/escrow`, { method: 'POST', body: { amount } }),
+  confirmComplete: (orderId) => request(`/payments/${orderId}/confirm-complete`, { method: 'POST' }),
+  applyRefund: (orderId, reason) => request(`/payments/${orderId}/apply-refund`, { method: 'POST', body: { reason } }),
+  settle: (orderId) => request(`/payments/${orderId}/settle`, { method: 'POST' }),
+  processRefund: (orderId, refundType, refundAmount) => request(`/payments/${orderId}/process-refund`, { method: 'POST', body: { refund_type: refundType, refund_amount: refundAmount } }),
+}
+
+export const interventionApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return request(`/interventions${qs ? '?' + qs : ''}`)
+  },
+  get: (id) => request(`/interventions/${id}`),
+  create: (data) => request('/interventions', { method: 'POST', body: data }),
+  process: (id, result, remark) => request(`/interventions/${id}/process`, { method: 'POST', body: { result, remark } }),
+}
+
 export const adminApi = {
   stats: () => request('/admin/stats'),
   providers: (params = {}) => {
